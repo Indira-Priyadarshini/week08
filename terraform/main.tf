@@ -12,6 +12,7 @@ resource "azurerm_container_registry" "acr" {
   location            = azurerm_resource_group.main.location
   sku                 = "Basic"
   admin_enabled       = false
+
 }
 
 # ---------------------------------------------------------------------------
@@ -34,11 +35,18 @@ resource "azurerm_kubernetes_cluster" "aks" {
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   dns_prefix          = var.aks_cluster_name
+  oidc_issuer_enabled = true
 
   default_node_pool {
     name       = "default"
     node_count = var.aks_node_count
     vm_size    = var.aks_node_vm_size
+
+    upgrade_settings {
+      drain_timeout_in_minutes      = 0
+      max_surge                     = "10%"
+      node_soak_duration_in_minutes = 0
+    }
   }
 
   identity {
